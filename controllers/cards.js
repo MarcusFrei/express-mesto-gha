@@ -15,7 +15,7 @@ const createCard = (req, res, next) => {
     .then((card) => res.status(201).send(card))
     .catch((err) => {
       if (err.name === 'Error') {
-        next(new Error('Переданы некорректные данные при создании карточки'));
+        next(new Error('Get invalid data for card creation'));
       } else {
         console.error(err);
         res.status(400).send({ message: 'Internal Server Error' });
@@ -29,13 +29,13 @@ const deleteCard = (req, res) => {
       if (card?.owner.toString() === req.user._id)
         return Card.findByIdAndDelete(req.params.cardId);
       else 
-        res.status(400).send({ message: 'Карточку нельзя удалить!' });
+        res.status(400).send({ message: "This card can't be deleted!" });
     })
     .then(card => {
       if (card) {
         res.send({ card });
       } else {
-        res.status(404).send({ message: 'Карточка с указанным _id не найдена.' });
+        res.status(404).send({ message: "Card with current _id can't be found!" });
       }
     })
     .catch((err) => {
@@ -51,12 +51,12 @@ const likeCard = (req, res) => {
       if (card) {
         res.send({ card });
       } else {
-        res.status(404).send({ message: 'Передан несуществующий _id карточки.' });
+        res.status(404).send({ message: "The specified card _id doesn't exist!" });
       }
     })
     .catch((err) => {
       console.error(err);
-      res.status(500).send({ message: 'Internal Server Error' });
+      res.status(400).send({ message: 'Internal Server Error' });
     });
 };
 
@@ -66,12 +66,12 @@ const dislikeCard = (req, res) => {
       if (card) {
         res.send({ card });
       } else {
-        res.status(404).send({ message: 'Передан несуществующий _id карточки.' });
+        res.status(404).send({ message: "The specified card _id doesn't exist!" });
       }
     })
     .catch((err) => {
       console.error(err);
-      res.status(500).send({ message: 'Internal Server Error' });
+      res.status(400).send({ message: 'Internal Server Error' });
     });
 }
 
