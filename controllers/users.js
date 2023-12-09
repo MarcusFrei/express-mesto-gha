@@ -3,8 +3,7 @@ const User = require('../models/user');
 const getUsers = (req, res) => {
   User.find({})
     .then((users) => res.send({ users }))
-    .catch((err) => {
-      console.error(err);
+    .catch(() => {
       res.status(500).send({ message: 'Internal Server Error' });
     });
 };
@@ -18,8 +17,7 @@ const getUserById = (req, res) => {
         res.status(404).send({ message: 'Пользователь по указанному _id не найден.' });
       }
     })
-    .catch((err) => {
-      console.error(err);
+    .catch(() => {
       res.status(500).send({ message: 'Internal Server Error' });
     });
 };
@@ -32,7 +30,6 @@ const createUser = (req, res) => {
       if (err.name === 'ValidationError') {
         res.status(400).send({ message: 'Переданы некорректные данные при создании пользователя.' });
       } else {
-        console.error(err);
         res.status(500).send({ message: 'Internal Server Error' });
       }
     });
@@ -40,7 +37,7 @@ const createUser = (req, res) => {
 
 const updateUserInfo = (req, res) => {
   const { name, about } = req.body;
-  User.findByIdAndUpdate(req.user._id, { name, about })
+  User.findByIdAndUpdate(req.user._id, { name, about }, { new: true, runValidators: true })
     .then((user) => {
       if (user) {
         res.send({ user });
@@ -48,15 +45,14 @@ const updateUserInfo = (req, res) => {
         res.status(404).send({ message: 'Пользователь с указанным _id не найден.' });
       }
     })
-    .catch((err) => {
-      console.error(err);
+    .catch(() => {
       res.status(500).send({ message: 'Internal Server Error' });
     });
 };
 
 const updateAvatar = (req, res) => {
   const { avatar } = req.body;
-  User.findByIdAndUpdate(req.user._id, { avatar })
+  User.findByIdAndUpdate(req.user._id, { avatar }, { new: true, runValidators: true })
     .then((user) => {
       if (user) {
         res.send({ user });
@@ -64,8 +60,7 @@ const updateAvatar = (req, res) => {
         res.status(404).send({ message: 'Пользователь с указанным _id не найден.' });
       }
     })
-    .catch((err) => {
-      console.error(err);
+    .catch(() => {
       res.status(500).send({ message: 'Internal Server Error' });
     });
 };
