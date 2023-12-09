@@ -33,7 +33,7 @@ const deleteCard = (req, res) => {
     })
     .then(card => {
       if (card) {
-        res.send({ card });
+        res.status(200).send({ message: "You've deleted this card!" });
       } else {
         res.status(404).send({ message: "Card with current _id can't be found!" });
       }
@@ -49,7 +49,7 @@ const likeCard = (req, res) => {
   Card.findByIdAndUpdate(req.params.cardId, { $addToSet: { likes: req.user._id } }, { new: true })
     .then(card => {
       if (card) {
-        res.send({ card });
+        res.status(200).send({ message: 'You put like on this card!' });
       } else {
         res.status(404).send({ message: "The specified card _id doesn't exist!" });
       }
@@ -64,7 +64,7 @@ const dislikeCard = (req, res) => {
   Card.findByIdAndUpdate(req.params.cardId,{ $pull: { likes: req.user._id } },{ new: true }) 
     .then(card => {
       if (card) {
-        res.send({ card });
+        res.status(200).send({ message: 'You delete like from this card!' });
       } else {
         res.status(404).send({ message: "The specified card _id doesn't exist!" });
       }
