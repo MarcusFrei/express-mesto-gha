@@ -18,7 +18,7 @@ const getUserById = (req, res) => {
       }
     })
     .catch(() => {
-      res.status(500).send({ message: 'Internal Server Error' });
+      res.status(400).send({ message: 'Internal Server Error' });
     });
 };
 
