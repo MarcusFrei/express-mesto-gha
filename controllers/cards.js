@@ -4,7 +4,7 @@ const Card = require('../models/card');
 const getCards = (req, res) => {
   Card.find({})
     .then((cards) => res.send({ cards }))
-    .catch((err) => {
+    .catch(() => {
       res.status(httpStatusCodes.INTERNAL_SERVER_ERROR).send({ message: 'Internal Server Error' });
     });
 };
@@ -23,56 +23,53 @@ const createCard = (req, res, next) => {
 };
 
 const deleteCard = (req, res) => {
-  Card.findById(req.params.cardId)
+  Card.findById(req.params.cardId).orFail(() => { throw new Error('cardNotFound'); })
     .then((card) => {
-      console.log(card);
-      if (card === null)  res.status(404).send({ message: "Card with current _id can't be found!" });
-      if (card?.owner.toString() === req.user._id)
+      if (card.owner.toString() === req.user._id) {
         return Card.findByIdAndDelete(req.params.cardId);
-      else 
-        res.status(httpStatusCodes.BAD_REQUEST).send({ message: "This card can't be deleted!" });
+      } throw new Error('invalidOwner');
     })
-    .then(card => {
+    .then((card) => {
       if (card) {
-        res.status(httpStatusCodes.OK).send({ message: "You've deleted this card!" });
+        res.status(httpStatusCodes.OK).send({ message: 'You\'ve deleted this card!' });
       }
     })
     .catch((err) => {
-      console.error(err.name);
-      if (err.name == 'CastError') res.status(400).send({ message: "Card with current _id can't be found!" });
+      if (err.message === 'cardNotFound') res.status(404).send({ message: 'Card with current _id can\'t be found!' });
+      if (err.message === 'invalidOwner') res.status(httpStatusCodes.BAD_REQUEST).send({ message: 'This card can\'t be deleted!' });
+      if (err.name === 'CastError') res.status(400).send({ message: 'Card with current _id can\'t be found!' });
       else res.status(500).send({ message: 'Internal Server Error' });
     });
 };
 
 const likeCard = (req, res) => {
-  console.log(req.params.cardId);
   Card.findByIdAndUpdate(req.params.cardId, { $addToSet: { likes: req.user._id } }, { new: true })
-    .then(card => {
+    .then((card) => {
       if (card) {
         res.status(httpStatusCodes.OK).send({ message: 'You put like on this card!' });
       } else {
-        res.status(404).send({ message: "The specified card _id doesn't exist!" });
+        res.status(404).send({ message: 'The specified card _id doesn\'t exist!' });
       }
     })
-    .catch((err) => {
-      console.error(err);
+    .catch(() => {
       res.status(400).send({ message: 'Internal Server Error' });
     });
 };
 
 const dislikeCard = (req, res) => {
-  Card.findByIdAndUpdate(req.params.cardId,{ $pull: { likes: req.user._id } },{ new: true }) 
-    .then(card => {
+  Card.findByIdAndUpdate(req.params.cardId, { $pull: { likes: req.user._id } }, { new: true })
+    .then((card) => {
       if (card) {
         res.status(200).send({ message: 'You delete like from this card!' });
       } else {
-        res.status(404).send({ message: "The specified card _id doesn't exist!" });
+        res.status(404).send({ message: 'The specified card _id doesn\'t exist!' });
       }
     })
-    .catch((err) => {
-      console.error(err);
+    .catch(() => {
       res.status(400).send({ message: 'Internal Server Error' });
     });
-}
+};
 
-module.exports = { getCards, createCard, deleteCard, likeCard, dislikeCard };
+module.exports = {
+  getCards, createCard, deleteCard, likeCard, dislikeCard,
+};
