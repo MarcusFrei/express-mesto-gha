@@ -12,12 +12,12 @@ const getCards = (req, res) => {
 const createCard = (req, res, next) => {
   const { name, link, owner } = req.body;
   Card.create({ name, link, owner })
-    .then((card) => res.status(201).send(card))
+    .then((card) => res.status(httpStatusCodes.CREATED).send(card))
     .catch((err) => {
       if (err.name === 'Error') {
         next(new Error('Get invalid data for card creation'));
       } else {
-        res.status(httpStatusCodes.BAD_REQUEST).send({ message: 'Internal Server Error' });
+        res.status(httpStatusCodes.BAD_REQUEST).send({ message: 'Bad request!' });
       }
     });
 };
@@ -35,10 +35,10 @@ const deleteCard = (req, res) => {
       }
     })
     .catch((err) => {
-      if (err.message === 'cardNotFound') res.status(404).send({ message: 'Card with current _id can\'t be found!' });
+      if (err.message === 'cardNotFound') res.status(httpStatusCodes.NOT_FOUND).send({ message: 'Card with current _id can\'t be found!' });
       if (err.message === 'invalidOwner') res.status(httpStatusCodes.BAD_REQUEST).send({ message: 'This card can\'t be deleted!' });
-      if (err.name === 'CastError') res.status(400).send({ message: 'Card with current _id can\'t be found!' });
-      else res.status(500).send({ message: 'Internal Server Error' });
+      if (err.name === 'CastError') res.status(httpStatusCodes.BAD_REQUEST).send({ message: 'Card with current _id can\'t be found!' });
+      else res.status(httpStatusCodes.INTERNAL_SERVER_ERROR).send({ message: 'Internal Server Error' });
     });
 };
 
@@ -48,11 +48,11 @@ const likeCard = (req, res) => {
       if (card) {
         res.status(httpStatusCodes.OK).send({ message: 'You put like on this card!' });
       } else {
-        res.status(404).send({ message: 'The specified card _id doesn\'t exist!' });
+        res.status(httpStatusCodes.NOT_FOUND).send({ message: 'The specified card _id doesn\'t exist!' });
       }
     })
     .catch(() => {
-      res.status(400).send({ message: 'Internal Server Error' });
+      res.status(httpStatusCodes.BAD_REQUEST).send({ message: 'Bad request!' });
     });
 };
 
@@ -62,11 +62,11 @@ const dislikeCard = (req, res) => {
       if (card) {
         res.status(200).send({ message: 'You delete like from this card!' });
       } else {
-        res.status(404).send({ message: 'The specified card _id doesn\'t exist!' });
+        res.status(httpStatusCodes.NOT_FOUND).send({ message: 'The specified card _id doesn\'t exist!' });
       }
     })
     .catch(() => {
-      res.status(400).send({ message: 'Internal Server Error' });
+      res.status(httpStatusCodes.BAD_REQUEST).send({ message: 'Bad request!' });
     });
 };
 

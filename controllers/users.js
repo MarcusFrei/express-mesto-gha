@@ -1,10 +1,11 @@
+const httpStatusCodes = require('../errors/errors');
 const User = require('../models/user');
 
 const getUsers = (req, res) => {
   User.find({})
     .then((users) => res.send({ users }))
     .catch(() => {
-      res.status(500).send({ message: 'Internal Server Error' });
+      res.status(httpStatusCodes.INTERNAL_SERVER_ERROR).send({ message: 'Internal Server Error' });
     });
 };
 
@@ -14,23 +15,23 @@ const getUserById = (req, res) => {
       if (user) {
         res.send(user);
       } else {
-        res.status(404).send({ message: 'Пользователь по указанному _id не найден.' });
+        res.status(httpStatusCodes.NOT_FOUND).send({ message: 'User with current _id can\'t be found!' });
       }
     })
     .catch(() => {
-      res.status(400).send({ message: 'Internal Server Error' });
+      res.status(httpStatusCodes.BAD_REQUEST).send({ message: 'Bad request!' });
     });
 };
 
 const createUser = (req, res) => {
   const { name, about, avatar } = req.body;
   User.create({ name, about, avatar })
-    .then((user) => res.status(201).send(user))
+    .then((user) => res.status(httpStatusCodes.CREATED).send(user))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(400).send({ message: 'Переданы некорректные данные при создании пользователя.' });
+        res.status(httpStatusCodes.BAD_REQUEST).send({ message: 'Incorrect data was passed when creating a user!' });
       } else {
-        res.status(500).send({ message: 'Internal Server Error' });
+        res.status(httpStatusCodes.INTERNAL_SERVER_ERROR).send({ message: 'Internal Server Error' });
       }
     });
 };
@@ -42,11 +43,11 @@ const updateUserInfo = (req, res) => {
       if (user) {
         res.send({ user });
       } else {
-        res.status(404).send({ message: 'Пользователь с указанным _id не найден.' });
+        res.status(httpStatusCodes.NOT_FOUND).send({ message: 'User with current _id can\'t be found!' });
       }
     })
     .catch(() => {
-      res.status(400).send({ message: 'Internal Server Error' });
+      res.status(httpStatusCodes.BAD_REQUEST).send({ message: 'Bad request!' });
     });
 };
 
@@ -57,11 +58,11 @@ const updateAvatar = (req, res) => {
       if (user) {
         res.send({ user });
       } else {
-        res.status(404).send({ message: 'Пользователь с указанным _id не найден.' });
+        res.status(httpStatusCodes.NOT_FOUND).send({ message: 'User with current _id can\'t be found!' });
       }
     })
     .catch(() => {
-      res.status(500).send({ message: 'Internal Server Error' });
+      res.status(httpStatusCodes.INTERNAL_SERVER_ERROR).send({ message: 'Internal Server Error' });
     });
 };
 
