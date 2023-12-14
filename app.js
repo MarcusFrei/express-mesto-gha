@@ -32,3 +32,6 @@ app.listen(PORT, () => {
 
 app.use('/users', router.users);
 app.use('/cards', router.cards);
+app.use('*', (req, res) => {
+  res.status(404).send({ message: 'Not found Route' });
+});

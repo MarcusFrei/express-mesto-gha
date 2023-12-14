@@ -1,15 +1,15 @@
+const { default: httpStatusCodes } = require('../errors/errors');
 const Card = require('../models/card');
 
 const getCards = (req, res) => {
   Card.find({})
     .then((cards) => res.send({ cards }))
     .catch((err) => {
-      res.status(500).send({ message: 'Internal Server Error' });
+      res.status(httpStatusCodes.INTERNAL_SERVER_ERROR).send({ message: 'Internal Server Error' });
     });
 };
 
 const createCard = (req, res, next) => {
-  console.log(req.body);
   const { name, link, owner } = req.body;
   Card.create({ name, link, owner })
     .then((card) => res.status(201).send(card))
@@ -17,7 +17,6 @@ const createCard = (req, res, next) => {
       if (err.name === 'Error') {
         next(new Error('Get invalid data for card creation'));
       } else {
-        console.error(err);
         res.status(400).send({ message: 'Internal Server Error' });
       }
     });
@@ -76,4 +75,3 @@ const dislikeCard = (req, res) => {
 }
 
 module.exports = { getCards, createCard, deleteCard, likeCard, dislikeCard };
- 
