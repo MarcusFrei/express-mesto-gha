@@ -9,8 +9,6 @@ const DB = 'mongodb://127.0.0.1:27017/mestodb';
 mongoose.connect(DB);
 const router = require('./routes');
 
-const db = mongoose.connection;
-
 app.use((req, res, next) => {
   req.user = {
     _id: '65703da48dbd9adf8885f9e5',
