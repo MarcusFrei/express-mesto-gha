@@ -18,8 +18,8 @@ const getUserById = (req, res) => {
         res.status(httpStatusCodes.NOT_FOUND).send({ message: 'User with current _id can\'t be found!' });
       }
     })
-    .catch(() => {
-      res.status(httpStatusCodes.BAD_REQUEST).send({ message: 'Bad request!' });
+    .catch((err) => {
+      if (err.name === 'CastError') res.status(httpStatusCodes.BAD_REQUEST).send({ message: 'Bad request!' });
     });
 };
 
