@@ -19,7 +19,8 @@ const getUserById = (req, res) => {
       }
     })
     .catch((err) => {
-      if (err.name === 'CastError') res.status(httpStatusCodes.BAD_REQUEST).send({ message: 'Bad request!' });
+      if (err.name === 'CastError') res.status(httpStatusCodes.BAD_REQUEST).send({ message: 'Get invalid data for finding this user!' });
+      else res.status(httpStatusCodes.INTERNAL_SERVER_ERROR).send({ message: 'Internal Server Error' });
     });
 };
 
@@ -46,8 +47,14 @@ const updateUserInfo = (req, res) => {
         res.status(httpStatusCodes.NOT_FOUND).send({ message: 'User with current _id can\'t be found!' });
       }
     })
-    .catch(() => {
-      res.status(httpStatusCodes.BAD_REQUEST).send({ message: 'Bad request!' });
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        res.status(httpStatusCodes.BAD_REQUEST).send({ message: 'Incorrect data was passed when updating a user!' });
+      } else if (err.name === 'CastError') {
+        res.status(httpStatusCodes.BAD_REQUEST).send({ message: 'Bad request!' });
+      } else {
+        res.status(httpStatusCodes.INTERNAL_SERVER_ERROR).send({ message: 'Internal Server Error' });
+      }
     });
 };
 
@@ -61,11 +68,22 @@ const updateAvatar = (req, res) => {
         res.status(httpStatusCodes.NOT_FOUND).send({ message: 'User with current _id can\'t be found!' });
       }
     })
-    .catch(() => {
-      res.status(httpStatusCodes.INTERNAL_SERVER_ERROR).send({ message: 'Internal Server Error' });
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        res.status(httpStatusCodes.BAD_REQUEST).send({ message: 'Incorrect data was passed when updating user \'s avatar!' });
+      } else if (err.name === 'CastError') {
+        res.status(httpStatusCodes.BAD_REQUEST).send({ message: 'Bad request!' });
+      } else {
+        res.status(httpStatusCodes.INTERNAL_SERVER_ERROR).send({ message: 'Internal Server Error' });
+      }
     });
 };
 
 module.exports = {
   getUsers, getUserById, createUser, updateUserInfo, updateAvatar,
 };
+
+// users- 400, 500
+// users/:userId - 400, 500
+// users/me - 500
+// /me/avatar - 400,404,500

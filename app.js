@@ -13,7 +13,7 @@ const { NOT_FOUND_ROUTE } = require('./const');
 
 app.use((req, res, next) => {
   req.user = {
-    _id: '65703da48dbd9adf8885f9e5',
+    _id: '65703da48dbd9adf8885f9e6',
   };
 
   next();
