@@ -3,6 +3,9 @@ const jwt = require('jsonwebtoken');
 const httpStatusCodes = require('../errors/errors');
 const User = require('../models/user');
 const { secretCode } = require('../utils/index');
+const Conflict = require('../errors/conflict');
+const BadRequest = require('../errors/badRequest');
+const NotFound = require('../errors/notFound');
 
 const login = (req, res) => {
   const { email, password } = req.body;
@@ -18,44 +21,46 @@ const login = (req, res) => {
     });
 };
 
-const getUsers = (req, res) => {
+const getUsers = (req, res, next) => {
   User.find({})
     .then((users) => res.send({ users }))
-    .catch(() => {
-      res.status(httpStatusCodes.INTERNAL_SERVER_ERROR).send({ message: 'Internal Server Error' });
-    });
+    .catch(next);
 };
 
-const getUserById = (req, res) => {
+const getUserById = (req, res, next) => {
   User.findById(req.params.userId)
     .then((user) => {
       if (user) {
         res.send(user);
       } else {
-        res.status(httpStatusCodes.NOT_FOUND).send({ message: 'User with current _id can\'t be found!' });
+        throw new NotFound('User with current _id can\'t be found!');
       }
     })
     .catch((err) => {
-      if (err.name === 'CastError') res.status(httpStatusCodes.BAD_REQUEST).send({ message: 'Get invalid data for finding this user!' });
-      else res.status(httpStatusCodes.INTERNAL_SERVER_ERROR).send({ message: 'Internal Server Error' });
+      if (err.name === 'CastError') {
+        next(new BadRequest('Bad request!'));
+      }
+      next(err);
     });
 };
 
-const getMe = (req, res) => {
+const getMe = (req, res, next) => {
   User.findById(req.user.id)
     .then((user) => {
       if (!user) {
-        res.status(httpStatusCodes.NOT_FOUND.send({ message: 'User with current _id can\'t be found!' }));
+        throw new NotFound('User with current _id can\'t be found!');
       }
       return res.status(httpStatusCodes.OK).send(user);
     })
     .catch((err) => {
-      if (err.name === 'CastError') res.status(httpStatusCodes.BAD_REQUEST).send({ message: 'Get invalid data for finding this user!' });
-      else res.status(httpStatusCodes.INTERNAL_SERVER_ERROR).send({ message: 'Internal Server Error' });
+      if (err.name === 'CastError') {
+        next(new BadRequest('Bad request!'));
+      }
+      next(err);
     });
 };
 
-const createUser = (req, res) => {
+const createUser = (req, res, next) => {
   const {
     name, about, avatar, email, password,
   } = req.body;
@@ -65,55 +70,46 @@ const createUser = (req, res) => {
     }))
     .then((user) => res.status(httpStatusCodes.CREATED).send(user))
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        res.status(httpStatusCodes.BAD_REQUEST).send({ message: 'Incorrect data was passed when creating a user!' });
-      } else if (err.name === 'MongoServerError' || err.code === 11000) {
-        res.status(httpStatusCodes.CONFLICT).send({ message: 'User with this email already exists!' });
-      } else {
-        res.status(httpStatusCodes.INTERNAL_SERVER_ERROR).send({ message: 'Internal Server Error' });
+      if (err.name === 'MongoServerError' || err.code === 11000) {
+        next(new Conflict('User with this email already exists!'));
       }
+      next(err);
     });
 };
 
-const updateUserInfo = (req, res) => {
+const updateUserInfo = (req, res, next) => {
   const { name, about } = req.body;
   User.findByIdAndUpdate(req.user.id, { name, about }, { new: true, runValidators: true })
     .then((user) => {
       if (user) {
         res.send({ user });
       } else {
-        res.status(httpStatusCodes.NOT_FOUND).send({ message: 'User with current _id can\'t be found!' });
+        throw new NotFound('User with current _id can\'t be found!');
       }
     })
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        res.status(httpStatusCodes.BAD_REQUEST).send({ message: 'Incorrect data was passed when updating a user!' });
-      } else if (err.name === 'CastError') {
-        res.status(httpStatusCodes.BAD_REQUEST).send({ message: 'Bad request!' });
-      } else {
-        res.status(httpStatusCodes.INTERNAL_SERVER_ERROR).send({ message: 'Internal Server Error' });
+      if (err.name === 'CastError') {
+        next(new BadRequest('Bad request!'));
       }
+      next(err);
     });
 };
 
-const updateAvatar = (req, res) => {
+const updateAvatar = (req, res, next) => {
   const { avatar } = req.body;
   User.findByIdAndUpdate(req.user.id, { avatar }, { new: true, runValidators: true })
     .then((user) => {
       if (user) {
         res.send({ user });
       } else {
-        res.status(httpStatusCodes.NOT_FOUND).send({ message: 'User with current _id can\'t be found!' });
+        throw new NotFound('User with current _id can\'t be found!');
       }
     })
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        res.status(httpStatusCodes.BAD_REQUEST).send({ message: 'Incorrect data was passed when updating user \'s avatar!' });
-      } else if (err.name === 'CastError') {
+      if (err.name === 'CastError') {
         res.status(httpStatusCodes.BAD_REQUEST).send({ message: 'Bad request!' });
-      } else {
-        res.status(httpStatusCodes.INTERNAL_SERVER_ERROR).send({ message: 'Internal Server Error' });
       }
+      next(err);
     });
 };
 
