@@ -7,7 +7,7 @@ const Conflict = require('../errors/conflict');
 const BadRequest = require('../errors/badRequest');
 const NotFound = require('../errors/notFound');
 
-const login = (req, res) => {
+const login = (req, res, next) => {
   const { email, password } = req.body;
   User.findUser(email, password).then((user) => {
     const token = jwt.sign({ id: user._id }, secretCode, { expiresIn: '7d' });
@@ -15,9 +15,9 @@ const login = (req, res) => {
     res.status(200).send({ id: user._id });
   })
     .catch((err) => {
-      if (err.name === 'NotFound') res.status(httpStatusCodes.NOT_FOUND).send({ message: err.message });
-      else if (err.name === 'Unauthorized') res.status(httpStatusCodes.UNAUTHORIZED).send({ message: err.message });
-      else res.status(httpStatusCodes.INTERNAL_SERVER_ERROR).send({ message: 'Internal Server Error' });
+     // if (err.name === 'NotFound') res.status(httpStatusCodes.NOT_FOUND).send({ message: err.message });
+      if (err.name === 'Unauthorized') res.status(httpStatusCodes.UNAUTHORIZED).send({ message: err.message });
+      next(err);
     });
 };
 
@@ -68,7 +68,11 @@ const createUser = (req, res, next) => {
     .then((hashPassword) => User.create({
       name, about, avatar, email, password: hashPassword,
     }))
-    .then((user) => res.status(httpStatusCodes.CREATED).send(user))
+    .then((user) => {
+      const result = user.toObject();
+      delete result.password;
+      res.status(httpStatusCodes.CREATED).send(result);
+    })
     .catch((err) => {
       if (err.name === 'MongoServerError' || err.code === 11000) {
         next(new Conflict('User with this email already exists!'));

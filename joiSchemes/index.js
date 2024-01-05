@@ -5,7 +5,7 @@ const signUpScheme = {
   body: Joi.object().keys({
     name: Joi.string().min(2).max(30).optional(),
     about: Joi.string().min(2).max(30).optional(),
-    avatar: Joi.string().optional(),
+    avatar: Joi.string().pattern(urlRegex).optional(),
     email: Joi.string().required().email(),
     password: Joi.string().required().min(2),
   }),
