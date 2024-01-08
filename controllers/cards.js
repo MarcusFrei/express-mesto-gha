@@ -19,59 +19,67 @@ const createCard = (req, res, next) => {
     .then((card) => res.status(httpStatusCodes.CREATED).send(card))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        throw new BadRequest('Get invalid data for card creation!');
-      }
-      next(err);
+        next(new BadRequest('Get invalid data for card creation!'));
+      } else next(err);
     });
 };
 
 const deleteCard = (req, res, next) => {
-  Card.findById(req.params.cardId).orFail(() => new NotFound('Card with current _id can\'t be found!'))
+  Card.findById(req.params.cardId)
+    .orFail(() => new NotFound('Card with current _id can\'t be found!'))
     .then((card) => {
       if (card.owner.toString() === req.user.id) {
         return Card.findByIdAndDelete(req.params.cardId);
-      } throw new Forbidden('This card can\'t be deleted!');
+      }
+      return next(new Forbidden('This card can\'t be deleted!'));
     })
+    .then((card) => res.status(httpStatusCodes.CREATED).send(card))
     .catch((err) => {
-      if (err.name === 'NotFound') throw new NotFound('Card with current _id can\'t be found!');
-      else if (err.name === 'CastError' || err.name === 'BadRequest') throw new BadRequest(err.message);
-      next(err);
+      if (err.name === 'NotFound') { next(new NotFound('Card with current _id can\'t be found!')); } else if (err.name === 'ValidationError' || err.name === 'BadRequest') { next(new BadRequest(err.message)); } else next(err);
     });
 };
 
 const likeCard = (req, res, next) => {
-  Card.findByIdAndUpdate(req.params.cardId, { $addToSet: { likes: req.user.id } }, { new: true })
+  Card.findByIdAndUpdate(
+    req.params.cardId,
+    { $addToSet: { likes: req.user.id } },
+    { new: true },
+  )
     .then((card) => {
       if (card) {
-        res.status(httpStatusCodes.OK).send({ message: 'You put like on this card!' });
+        res
+          .status(httpStatusCodes.OK)
+          .send({ message: 'You put like on this card!' });
       } else {
-        throw new NotFound('The specified card _id doesn\'t exist!');
+        next(new NotFound('The specified card _id doesn\'t exist!'));
       }
     })
     .catch((err) => {
-      if (err.name === 'CastError') {
-        throw new BadRequest(err.message);
-      }
-      next(err);
+      if (err.name === 'ValidationError') {
+        next(new BadRequest(err.message));
+      } else next(err);
     });
 };
 
 const dislikeCard = (req, res, next) => {
-  Card.findByIdAndUpdate(req.params.cardId, { $pull: { likes: req.user.id } }, { new: true })
+  Card.findByIdAndUpdate(
+    req.params.cardId,
+    { $pull: { likes: req.user.id } },
+    { new: true },
+  )
     .then((card) => {
       if (card) {
         res.status(200).send({ message: 'You delete like from this card!' });
       } else {
-        throw new NotFound('The specified card _id doesn\'t exist!');
+        next(new NotFound('The specified card _id doesn\'t exist!'));
       }
     })
     .catch((err) => {
       if (err.name === 'NotFound') {
-        throw new NotFound('Card with current _id can\'t be found!');
-      } else if (err.name === 'CastError') {
-        throw new BadRequest(err.message);
-      }
-      next(err);
+        next(new NotFound('Card with current _id can\'t be found!'));
+      } else if (err.name === 'ValidationError') {
+        next(new BadRequest(err.message));
+      } else next(err);
     });
 };
 

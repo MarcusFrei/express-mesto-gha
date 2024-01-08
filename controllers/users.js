@@ -31,7 +31,7 @@ const getUserById = (req, res, next) => {
       if (user) {
         res.send(user);
       } else {
-        throw new NotFound('User with current _id can\'t be found!');
+        next(new NotFound('User with current _id can\'t be found!'));
       }
     })
     .catch((err) => {
@@ -46,7 +46,7 @@ const getMe = (req, res, next) => {
   User.findById(req.user.id)
     .then((user) => {
       if (!user) {
-        throw new NotFound('User with current _id can\'t be found!');
+        next(new NotFound('User with current _id can\'t be found!'));
       }
       return res.status(httpStatusCodes.OK).send(user);
     })
@@ -86,14 +86,13 @@ const updateUserInfo = (req, res, next) => {
       if (user) {
         res.send({ user });
       } else {
-        throw new NotFound('User with current _id can\'t be found!');
+        next(new NotFound('User with current _id can\'t be found!'));
       }
     })
     .catch((err) => {
-      if (err.name === 'CastError') {
+      if (err.name === 'ValidationError') {
         next(new BadRequest('Bad request!'));
-      }
-      next(err);
+      } else next(err);
     });
 };
 
@@ -104,12 +103,12 @@ const updateAvatar = (req, res, next) => {
       if (user) {
         res.send({ user });
       } else {
-        throw new NotFound('User with current _id can\'t be found!');
+        next(new NotFound('User with current _id can\'t be found!'));
       }
     })
     .catch((err) => {
-      if (err.name === 'CastError') {
-        res.status(httpStatusCodes.BAD_REQUEST).send({ message: 'Bad request!' });
+      if (err.name === 'ValidationError') {
+        next(new BadRequest('Bad request!'));
       }
       next(err);
     });
