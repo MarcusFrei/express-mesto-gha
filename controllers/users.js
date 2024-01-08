@@ -15,7 +15,6 @@ const login = (req, res, next) => {
     res.status(200).send({ id: user._id });
   })
     .catch((err) => {
-     // if (err.name === 'NotFound') res.status(httpStatusCodes.NOT_FOUND).send({ message: err.message });
       if (err.name === 'Unauthorized') res.status(httpStatusCodes.UNAUTHORIZED).send({ message: err.message });
       next(err);
     });

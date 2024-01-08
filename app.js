@@ -26,7 +26,7 @@ app.listen(PORT);
 app.post('/signin', celebrate(signInScheme), login);
 app.post('/signup', celebrate(signUpScheme), createUser);
 app.use('/users', auth, router.users);
-app.use('/cards', router.cards);
+app.use('/cards', auth, router.cards);
 
 app.use('*', (req, res) => {
   res.status(httpStatusCodes.NOT_FOUND).send({ message: NOT_FOUND_ROUTE });

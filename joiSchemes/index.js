@@ -23,12 +23,45 @@ const updateUserScheme = {
     about: Joi.string().required().min(2).max(30),
   }),
 };
+
 const updateAvatarScheme = {
   body: Joi.object().keys({
     avatar: Joi.string().pattern(urlRegex).required(),
   }),
 };
 
+const createCardScheme = {
+  body: Joi.object().keys({
+    name: Joi.string().min(2).max(30).required(),
+    link: Joi.string().pattern(urlRegex).required(),
+  }),
+};
+
+const deleteCardScheme = {
+  params: Joi.object().keys({
+    cardId: Joi.string().length(24).hex().required(),
+  }),
+};
+
+const putLikeScheme = {
+  params: Joi.object().keys({
+    cardId: Joi.string().length(24).hex().required(),
+  }),
+};
+
+const deleteLikeScheme = {
+  params: Joi.object().keys({
+    cardId: Joi.string().length(24).hex().required(),
+  }),
+};
+
 module.exports = {
-  signUpScheme, updateUserScheme, signInScheme, updateAvatarScheme,
+  signUpScheme,
+  updateUserScheme,
+  signInScheme,
+  updateAvatarScheme,
+  createCardScheme,
+  deleteCardScheme,
+  putLikeScheme,
+  deleteLikeScheme,
 };
