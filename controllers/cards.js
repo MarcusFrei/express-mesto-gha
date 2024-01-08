@@ -18,7 +18,6 @@ const createCard = (req, res, next) => {
   Card.create({ name, link, owner })
     .then((card) => res.status(httpStatusCodes.CREATED).send(card))
     .catch((err) => {
-      console.log(err);
       if (err.name === 'ValidationError') {
         throw new BadRequest('Get invalid data for card creation!');
       }
@@ -50,9 +49,7 @@ const likeCard = (req, res, next) => {
       }
     })
     .catch((err) => {
-      if (err.name === 'NotFound') {
-        throw new NotFound('Card with current _id can\'t be found!');
-      } else if (err.name === 'CastError') {
+      if (err.name === 'CastError') {
         throw new BadRequest(err.message);
       }
       next(err);

@@ -37,19 +37,7 @@ const createCardScheme = {
   }),
 };
 
-const deleteCardScheme = {
-  params: Joi.object().keys({
-    cardId: Joi.string().length(24).hex().required(),
-  }),
-};
-
-const putLikeScheme = {
-  params: Joi.object().keys({
-    cardId: Joi.string().length(24).hex().required(),
-  }),
-};
-
-const deleteLikeScheme = {
+const cardIdScheme = {
   params: Joi.object().keys({
     cardId: Joi.string().length(24).hex().required(),
   }),
@@ -61,7 +49,5 @@ module.exports = {
   signInScheme,
   updateAvatarScheme,
   createCardScheme,
-  deleteCardScheme,
-  putLikeScheme,
-  deleteLikeScheme,
+  cardIdScheme,
 };

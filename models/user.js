@@ -2,7 +2,6 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const { urlRegex, emailRegex } = require('../utils/index');
 const Unauthorized = require('../errors/unauthorized');
-const NotFound = require('../errors/notFound');
 
 const userSchema = new mongoose.Schema(
   {
@@ -60,7 +59,7 @@ const userSchema = new mongoose.Schema(
                 if (answer) return user;
                 return Promise.reject(new Unauthorized('User is not authorized!'));
               });
-          } return Promise.reject(new NotFound('User with current e-mail can\'t be found!'));
+          } return Promise.reject(new Unauthorized('User with current e-mail can\'t be found!'));
         });
       },
     },
