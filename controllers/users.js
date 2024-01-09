@@ -35,10 +35,9 @@ const getUserById = (req, res, next) => {
       }
     })
     .catch((err) => {
-      if (err.name === 'CastError') {
+      if (err.name === 'ValidationError') {
         next(new BadRequest('Bad request!'));
-      }
-      next(err);
+      } else next(err);
     });
 };
 
@@ -51,10 +50,9 @@ const getMe = (req, res, next) => {
       return res.status(httpStatusCodes.OK).send(user);
     })
     .catch((err) => {
-      if (err.name === 'CastError') {
+      if (err.name === 'ValidationError') {
         next(new BadRequest('Bad request!'));
-      }
-      next(err);
+      } else next(err);
     });
 };
 
@@ -72,10 +70,11 @@ const createUser = (req, res, next) => {
       res.status(httpStatusCodes.CREATED).send(result);
     })
     .catch((err) => {
-      if (err.name === 'MongoServerError' || err.code === 11000) {
+      if (err.name === 'ValidationError') {
+        next(new BadRequest('Bad request!'));
+      } else if (err.name === 'MongoServerError' || err.code === 11000) {
         next(new Conflict('User with this email already exists!'));
-      }
-      next(err);
+      } else next(err);
     });
 };
 
@@ -98,7 +97,11 @@ const updateUserInfo = (req, res, next) => {
 
 const updateAvatar = (req, res, next) => {
   const { avatar } = req.body;
-  User.findByIdAndUpdate(req.user.id, { avatar }, { new: true, runValidators: true })
+  User.findByIdAndUpdate(
+    req.user.id,
+    { avatar },
+    { new: true, runValidators: true },
+  )
     .then((user) => {
       if (user) {
         res.send({ user });
@@ -109,8 +112,7 @@ const updateAvatar = (req, res, next) => {
     .catch((err) => {
       if (err.name === 'ValidationError') {
         next(new BadRequest('Bad request!'));
-      }
-      next(err);
+      } else next(err);
     });
 };
 
